@@ -19,6 +19,7 @@ We use *breaking :warning:* to mark changes that are not backward compatible (re
 
 - [#8900](https://github.com/thanos-io/thanos/pull/8900): UI: Fix web UI static assets (JS/CSS) returning 404 on Windows by using slash-separated paths for the embedded file system.
 - [#8935](https://github.com/thanos-io/thanos/pull/8935): Receive: remove redundant tl.Set() while building a Capnp WriteRequest.
+- [#8966](https://github.com/thanos-io/thanos/pull/8966): Receive: fix `replicationErrors.Cause()` returning nil for a permanently failed series when the replication factor makes the failure threshold lower than the success threshold, which could make a failed replicated write's gRPC ack falsely report success and mapped its HTTP response to a generic 500 instead of a retryable 503.
 
 ### Changed
 

@@ -2411,3 +2411,24 @@ func TestPeerGroupResetRace(t *testing.T) {
 
 	wg.Wait()
 }
+
+// TestReplicationErrorsCauseNeverReturnsNil guards the invariant relied upon
+// throughout this file (see the "errors.Cause returned nil on a non-nil
+// error" panic in RemoteWrite): Cause must never return nil for a non-empty
+// errorSet. Before the fix, a series with fewer failures than threshold but
+// no single dominant error type fell through to "return nil", which made
+// errors.Cause(err) return nil for a non-nil writeErrors -- causing the gRPC
+// RemoteWrite handler to report success for a write that actually failed,
+// and the HTTP handler to log an empty "err" for a 500 response.
+func TestReplicationErrorsCauseNeverReturnsNil(t *testing.T) {
+	t.Parallel()
+
+	// threshold higher than the number of errors added, with no single
+	// error type dominating -- this used to fall through to "return nil".
+	es := &replicationErrors{threshold: 3}
+	es.Add(errNotReady)
+	es.Add(errUnavailable)
+
+	require.NotNil(t, es.Cause())
+	require.Equal(t, errUnavailable, es.Cause())
+}

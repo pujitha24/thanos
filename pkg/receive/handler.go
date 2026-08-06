@@ -1666,15 +1666,15 @@ type replicationErrors struct {
 
 // Cause extracts the sentinel error that best describes the replication outcome.
 //
-// If one error type appears at least threshold times it is returned directly
-// (a conflict-dominated series can never succeed).
+// If one error type appears at least es.threshold times it is returned
+// directly (a conflict-dominated series can never succeed).
 //
-// Otherwise, if total errors meet the threshold but no single type dominates,
-// the series failed quorum due to a mix of error types.
-//
-// Because canReturnEarly only fires early when conflict failures alone reach
-// the threshold, reaching this fallback guarantees that conflict_count < failureThreshold,
-// the request could succeed on retry once transient failures resolve.
+// Otherwise the series failed due to a mix of error types, or the caller's
+// own failureThreshold (which can be lower than es.threshold, see
+// fanoutForward) was reached with too few errors to satisfy es.threshold
+// here. Either way es.errs is non-empty and the series is permanently
+// failed, so errUnavailable is returned: retry may still succeed once
+// transient failures resolve.
 func (es *replicationErrors) Cause() error {
 	if len(es.errs) == 0 {
 		return errorSet{}
@@ -1700,13 +1700,7 @@ func (es *replicationErrors) Cause() error {
 		return exp.err
 	}
 
-	if len(es.errs) >= es.threshold {
-		// conflict count is below the threshold so retry may
-		// succeed once transient replicas recover.
-		return errUnavailable
-	}
-
-	return nil
+	return errUnavailable
 }
 
 func newReplicationErrors(threshold, numErrors int) []*replicationErrors {
