@@ -497,6 +497,13 @@ Flags:
                                  "for" state. This is maintained only for alerts
                                  with configured "for" time greater than grace
                                  period.
+      --[no-]restore-new-rule-groups
+                                 Restore the "for" state of alerts in rule
+                                 groups that are added on a rule reload (e.g.
+                                 when an alert moves to another rule file),
+                                 instead of only after a restart. In stateless
+                                 mode this issues extra queries to the query API
+                                 on reload.
       --restore-ignored-label=RESTORE-IGNORED-LABEL ...
                                  Label names to be ignored when restoring alerts
                                  from the remote storage. This is only used in

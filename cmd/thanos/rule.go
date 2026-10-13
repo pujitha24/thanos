@@ -107,6 +107,7 @@ type ruleConfig struct {
 	queryOffset        time.Duration
 	outageTolerance    time.Duration
 	forGracePeriod     time.Duration
+	restoreNewGroups   bool
 	ruleFiles          []string
 	objStoreConfig     *extflag.PathOrContent
 	dataDir            string
@@ -165,6 +166,8 @@ func registerRule(app *extkingpin.App) {
 		Default("1h").DurationVar(&conf.outageTolerance)
 	cmd.Flag("for-grace-period", "Minimum duration between alert and restored \"for\" state. This is maintained only for alerts with configured \"for\" time greater than grace period.").
 		Default("10m").DurationVar(&conf.forGracePeriod)
+	cmd.Flag("restore-new-rule-groups", "Restore the \"for\" state of alerts in rule groups that are added on a rule reload (e.g. when an alert moves to another rule file), instead of only after a restart. In stateless mode this issues extra queries to the query API on reload.").
+		Default("false").BoolVar(&conf.restoreNewGroups)
 	cmd.Flag("restore-ignored-label", "Label names to be ignored when restoring alerts from the remote storage. This is only used in stateless mode.").
 		StringsVar(&conf.ignoredLabelNames)
 	cmd.Flag("rule-concurrent-evaluation", "How many rules can be evaluated concurrently. Default is 1.").Default("1").Int64Var(&conf.ruleConcurrentEval)
@@ -652,6 +655,7 @@ func runRule(
 			ResendDelay:            conf.resendDelay,
 			OutageTolerance:        conf.outageTolerance,
 			ForGracePeriod:         conf.forGracePeriod,
+			RestoreNewRuleGroups:   conf.restoreNewGroups,
 			DefaultRuleQueryOffset: func() time.Duration { return conf.queryOffset },
 		}
 		if conf.ruleConcurrentEval > 1 {

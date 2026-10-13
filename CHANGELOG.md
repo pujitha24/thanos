@@ -18,6 +18,7 @@ We use *breaking :warning:* to mark changes that are not backward compatible (re
 - [#8876](https://github.com/thanos-io/thanos/pull/8876): Query-Frontend: Reuse compatible lower-step query range cache entries by subsampling cached responses.
 - [#9056](https://github.com/thanos-io/thanos/pull/9056): *: Add `http_headers` to the HTTP client config, so Rule can send custom headers to query and Alertmanager endpoints (also available in Sidecar and Receive).
 - [#8234](https://github.com/thanos-io/thanos/pull/8234) ruler: Add flag to configure the queue for pending Alertmanager notifications
+- [#8977](https://github.com/thanos-io/thanos/issues/8977) Rule: Add `--restore-new-rule-groups` flag to restore the `for` state of alerts in rule groups added on reload, so alerts moved between rule files keep their state.
 
 ### Fixed
 
